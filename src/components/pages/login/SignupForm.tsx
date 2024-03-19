@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CognitoUserAttribute } from 'amazon-cognito-identity-js'; // Import CognitoUserAttribute
 import { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { InputPassword } from '@/components/framework/forms/input-password';
@@ -20,8 +20,9 @@ import {
   SignupValidationSchema,
 } from '@/validation/signup.validation';
 
+import VerifyUserDialog from './VerifyUserDialog';
+
 const initFormVal = {
-  username: '',
   email: '',
   password: '',
 };
@@ -31,6 +32,9 @@ interface ISignupForm {
 }
 
 const SignupForm = ({ setNoAccount }: ISignupForm) => {
+  const [userVerifyDialog, setUserVerifyDialog] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+
   const {
     register,
     handleSubmit,
@@ -42,14 +46,10 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
   });
 
   async function handleSignup(formData: signupPayload) {
-    const { username, email, password } = formData;
+    const { email, password } = formData;
+    setUserEmail(email);
 
-    const emailAttribute = new CognitoUserAttribute({
-      Name: 'email',
-      Value: email,
-    });
-
-    userPool.signUp(username, password, [emailAttribute], [], (error) => {
+    userPool.signUp(email, password, [], [], (error) => {
       if (error) {
         return errorToast({
           message: error.message,
@@ -57,9 +57,11 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
       }
 
       successToast({
-        description: 'Yay!',
         message: 'User successfully registered!',
+        description: 'Please check your email address for confirmation code.',
       });
+
+      setUserVerifyDialog(true);
     });
   }
 
@@ -74,15 +76,6 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
           onSubmit={handleSubmit(handleSignup)}
           id='signup-form'
         >
-          <Input
-            id='username'
-            type='text'
-            placeholder='Username'
-            autoComplete='off'
-            error={errors.username?.message}
-            {...register('username')}
-          />
-
           <Input
             id='email'
             type='text'
@@ -122,6 +115,13 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
           Signup
         </Button>
       </CardFooter>
+
+      <VerifyUserDialog
+        email={userEmail}
+        open={userVerifyDialog}
+        setOpen={setUserVerifyDialog}
+        setNoAccount={setNoAccount}
+      />
     </>
   );
 };

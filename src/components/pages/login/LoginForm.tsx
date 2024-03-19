@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dispatch, SetStateAction } from 'react';
+import { AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { InputPassword } from '@/components/framework/forms/input-password';
+import { errorToast, successToast } from '@/components/framework/toast';
 import { Text } from '@/components/framework/typography';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -12,10 +14,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { userPool } from '@/config/cognitoConfig';
 import {
   loginPayload,
   LoginValidationSchema,
 } from '@/validation/login.validation';
+
+import VerifyUserDialog from './VerifyUserDialog';
 
 const initFormVal = {
   email: '',
@@ -27,6 +32,10 @@ interface ILoginForm {
 }
 
 const LoginForm = ({ setNoAccount }: ILoginForm) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userVerifyDialog, setUserVerifyDialog] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+
   const {
     register,
     handleSubmit,
@@ -37,13 +46,36 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
     defaultValues: initFormVal,
   });
 
-  async function handleLogin(data: loginPayload) {
-    const payload = {
-      email: data.email,
-      password: data.password,
-    };
+  async function handleLogin(formData: loginPayload) {
+    setLoading(true);
+    const { email, password } = formData;
 
-    console.log('payload');
+    const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
+
+    const authPayload = new AuthenticationDetails({
+      Username: email,
+      Password: password,
+    });
+
+    cognitoUser.authenticateUser(authPayload, {
+      onSuccess: (data) => {
+        successToast({
+          message: 'Successfully logged in!',
+        });
+        setLoading(false);
+      },
+      onFailure: (error) => {
+        if (error.message == 'User is not confirmed.') {
+          setUserEmail(email);
+          setLoading(false);
+          setUserVerifyDialog(true);
+        }
+
+        errorToast({
+          message: error.message,
+        });
+      },
+    });
   }
 
   return (
@@ -88,6 +120,7 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
         <Button
           form='login-form'
           type='submit'
+          isLoading={loading}
           className={buttonVariants({
             variant: 'default',
             className: 'w-full	',
@@ -96,6 +129,13 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
           Login
         </Button>
       </CardFooter>
+
+      <VerifyUserDialog
+        email={userEmail}
+        open={userVerifyDialog}
+        setOpen={setUserVerifyDialog}
+        setNoAccount={setNoAccount}
+      />
     </>
   );
 };
