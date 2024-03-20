@@ -53,6 +53,7 @@ const VerifyUserDialog = ({
   useEffect(() => {
     if (email) {
       setValue('email', email);
+      setValue('confirmationCode', '');
     }
   }, [email]);
 
@@ -72,6 +73,25 @@ const VerifyUserDialog = ({
       });
       setOpen(false);
       setNoAccount(false);
+    });
+  }
+
+  function handleResendCode() {
+    const cognitoUser = new CognitoUser({
+      Username: email as string,
+      Pool: userPool,
+    });
+
+    cognitoUser.resendConfirmationCode((error) => {
+      if (error) {
+        return errorToast({
+          message: error.message,
+        });
+      }
+
+      successToast({
+        message: 'Confirmation code successfully sent!',
+      });
     });
   }
 
@@ -110,7 +130,7 @@ const VerifyUserDialog = ({
             <Text
               as='a'
               className='cursor-pointer text-xs text-blue-700 underline'
-              onClick={() => alert('sending ...')}
+              onClick={handleResendCode}
             >
               Resend Code
             </Text>

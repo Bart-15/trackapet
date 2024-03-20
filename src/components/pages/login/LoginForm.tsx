@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
+import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -32,6 +33,8 @@ interface ILoginForm {
 }
 
 const LoginForm = ({ setNoAccount }: ILoginForm) => {
+  const router = useRouter();
+
   const [loading, setLoading] = useState<boolean>(false);
   const [userVerifyDialog, setUserVerifyDialog] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
@@ -40,6 +43,7 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<loginPayload>({
     mode: 'onBlur',
     resolver: zodResolver(LoginValidationSchema),
@@ -63,6 +67,9 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
           message: 'Successfully logged in!',
         });
         setLoading(false);
+        reset(); // reset all form fields
+
+        router.push('/home');
       },
       onFailure: (error) => {
         if (error.message == 'User is not confirmed.') {
