@@ -1,15 +1,15 @@
 'use client';
 
 import DashboardLayout from '@/components/dashboard/Layout';
-import Home from '@/components/pages/home/Home';
+import Pets from '@/components/pages/my-pets/Pets';
 import withAuth from '@/hoc/withAuth';
 
-const HompePage = () => {
+const MyPetsPage = () => {
   return (
     <DashboardLayout>
-      <Home />
+      <Pets />
     </DashboardLayout>
   );
 };
 
-export default withAuth(HompePage);
+export default withAuth(MyPetsPage);

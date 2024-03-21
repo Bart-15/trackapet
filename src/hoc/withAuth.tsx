@@ -37,7 +37,6 @@ export function withAuth<P>(
       return <LoadingSpinner />;
     }
 
-    console.log(user);
     return user && <Component {...props} />;
   };
 }

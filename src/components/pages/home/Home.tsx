@@ -1,19 +1,7 @@
-import { useContext } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
+import PageTitle from '@/components/common/PageTitle';
 
 const Home = () => {
-  const cognito = useContext(AuthCognitoContext);
-  if (!cognito) throw new Error('Cognito context is undefined');
-
-  const { signOut } = cognito;
-
-  return (
-    <div className='container'>
-      <Button onClick={signOut}>Signout</Button>
-    </div>
-  );
+  return <PageTitle title='👋 Welcome back!' className='font-semibold' />;
 };
 
 export default Home;
