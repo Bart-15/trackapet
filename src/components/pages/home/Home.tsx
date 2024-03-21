@@ -1,23 +1,13 @@
-import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { userPool } from '@/config/cognitoConfig';
+import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
 
 const Home = () => {
-  const router = useRouter();
+  const cognito = useContext(AuthCognitoContext);
+  if (!cognito) throw new Error('Cognito context is undefined');
 
-  function signOut() {
-    const cognitoUser = userPool.getCurrentUser();
-
-    if (cognitoUser) {
-      cognitoUser.globalSignOut({
-        onSuccess: () => {
-          router.push('/login');
-        },
-        onFailure: () => {},
-      });
-    }
-  }
+  const { signOut } = cognito;
 
   return (
     <div className='container'>

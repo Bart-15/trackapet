@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
 import { useRouter } from 'next/navigation';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { InputPassword } from '@/components/framework/forms/input-password';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { userPool } from '@/config/cognitoConfig';
+import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
 import {
   loginPayload,
   LoginValidationSchema,
@@ -33,6 +34,11 @@ interface ILoginForm {
 }
 
 const LoginForm = ({ setNoAccount }: ILoginForm) => {
+  const cognito = useContext(AuthCognitoContext);
+  if (!cognito) throw new Error('Cognito context is undefined');
+
+  const { setUser } = cognito;
+
   const router = useRouter();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -62,12 +68,14 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
     });
 
     cognitoUser.authenticateUser(authPayload, {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         successToast({
           message: 'Successfully logged in!',
         });
         setLoading(false);
         reset(); // reset all form fields
+        const user = userPool.getCurrentUser();
+        setUser(user);
 
         router.push('/home');
       },
@@ -81,6 +89,7 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
         errorToast({
           message: error.message,
         });
+        setLoading(false);
       },
     });
   }
