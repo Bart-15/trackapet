@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signUp } from 'aws-amplify/auth';
 import { Dispatch, SetStateAction } from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { InputPassword } from '@/components/framework/forms/input-password';
-import { errorToast, successToast } from '@/components/framework/toast';
+import { warningToast } from '@/components/framework/toast';
 import { Text } from '@/components/framework/typography';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -14,7 +15,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { userPool } from '@/config/cognitoConfig';
 import {
   signupPayload,
   SignupValidationSchema,
@@ -46,23 +46,36 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
   });
 
   async function handleSignup(formData: signupPayload) {
-    const { email, password } = formData;
-    setUserEmail(email);
+    const payload = {
+      username: formData.email,
+      password: formData.password,
+      attributes: {
+        'custom:role': 'user',
+      },
+    };
 
-    userPool.signUp(email, password, [], [], (error) => {
-      if (error) {
-        return errorToast({
-          message: error.message,
-        });
+    try {
+      const { nextStep } = await signUp(payload);
+      const checkStep = nextStep.signUpStep;
+
+      switch (checkStep) {
+        case 'DONE':
+          setUserVerifyDialog(false);
+          break;
+        case 'CONFIRM_SIGN_UP':
+          setUserEmail(formData.email);
+          warningToast({
+            message: 'Your account is not verified',
+            description: 'Please check your email for verification code',
+          });
+          setUserVerifyDialog(true);
+          break;
+        default:
       }
-
-      successToast({
-        message: 'User successfully registered!',
-        description: 'Please check your email address for confirmation code.',
-      });
-
-      setUserVerifyDialog(true);
-    });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
   }
 
   return (

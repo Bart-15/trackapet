@@ -1,10 +1,10 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { redirect, usePathname, useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import { LoadingSpinner } from '@/components/framework/loading-spinner';
-import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
+import { AuthCognitoContext } from '@/context/CognitoProvider';
 
 interface ProtectedComponentProps {
   // Define any specific props for your wrapped component here
@@ -19,21 +19,23 @@ export function withAuth<P>(
     const cognito = useContext(AuthCognitoContext);
     if (!cognito) throw new Error('Cognito context is undefined');
 
-    const { user, isLoading } = cognito;
+    const { user, loading } = cognito;
 
     useEffect(() => {
       const loginRedirect = async () => {
-        if (!isLoading && user === null) {
+        if (!user && !loading) {
           localStorage.setItem('redirectTo', pathname);
           router.push('/');
+
+          return;
         }
       };
 
       loginRedirect();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, isLoading]);
+    }, [user]);
 
-    if (isLoading) {
+    if (loading) {
       return <LoadingSpinner />;
     }
 

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import Login from '@/components/pages/login/Login';
-import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
+import { AuthCognitoContext } from '@/context/CognitoProvider';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -11,7 +11,7 @@ const LoginPage = () => {
   const cognito = useContext(AuthCognitoContext);
   if (!cognito) throw new Error('Cognito context is undefined');
 
-  const { user, isLoading } = cognito;
+  const { user, loading } = cognito;
 
   useEffect(() => {
     const loginRedirect = async () => {
@@ -19,10 +19,9 @@ const LoginPage = () => {
         router.push('/home');
       }
     };
-
     loginRedirect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoading]);
+  }, [user, loading]);
 
   return <Login />;
 };

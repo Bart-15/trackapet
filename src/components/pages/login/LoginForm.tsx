@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
+import { signIn } from 'aws-amplify/auth';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,8 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { userPool } from '@/config/cognitoConfig';
-import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
+import { AuthCognitoContext } from '@/context/CognitoProvider';
 import {
   loginPayload,
   LoginValidationSchema,
@@ -37,7 +36,7 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
   const cognito = useContext(AuthCognitoContext);
   if (!cognito) throw new Error('Cognito context is undefined');
 
-  const { setUser } = cognito;
+  const { getAuthUser } = cognito;
 
   const router = useRouter();
 
@@ -58,40 +57,43 @@ const LoginForm = ({ setNoAccount }: ILoginForm) => {
 
   async function handleLogin(formData: loginPayload) {
     setLoading(true);
-    const { email, password } = formData;
-
-    const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
-
-    const authPayload = new AuthenticationDetails({
-      Username: email,
-      Password: password,
-    });
-
-    cognitoUser.authenticateUser(authPayload, {
-      onSuccess: async (data) => {
-        successToast({
-          message: 'Successfully logged in!',
-        });
-        setLoading(false);
-        reset(); // reset all form fields
-        const user = userPool.getCurrentUser();
-        setUser(user);
-
-        router.push('/home');
+    const payload = {
+      username: formData.email,
+      password: formData.password,
+      attributes: {
+        'custom:role': 'user',
       },
-      onFailure: (error) => {
-        if (error.message == 'User is not confirmed.') {
-          setUserEmail(email);
-          setLoading(false);
-          setUserVerifyDialog(true);
-        }
+    };
 
+    try {
+      const { nextStep } = await signIn(payload);
+      const checkStep = nextStep.signInStep;
+
+      switch (checkStep) {
+        case 'DONE':
+          await getAuthUser();
+          router.push('/home');
+          reset();
+          break;
+        case 'CONFIRM_SIGN_UP':
+          setUserEmail(payload.username);
+          setUserVerifyDialog(true);
+          successToast({
+            message: 'Successfully logged in!',
+          });
+          break;
+        default:
+      }
+    } catch (error) {
+      if (error instanceof Error) {
         errorToast({
           message: error.message,
         });
-        setLoading(false);
-      },
-    });
+      }
+      // eslint-disable-next-line no-console
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

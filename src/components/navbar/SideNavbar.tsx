@@ -7,7 +7,7 @@ import { Nav } from '../ui/nav';
 
 type Props = {};
 
-import { AuthCognitoContext } from '@/context/AuthCognitoProvider';
+import { AuthCognitoContext } from '@/context/CognitoProvider';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 
 import { Icons } from '../Icons';
@@ -17,7 +17,7 @@ export default function SideNavbar({}: Props) {
   const cognito = useContext(AuthCognitoContext);
   if (!cognito) throw new Error('Cognito context is undefined');
 
-  const { signOut } = cognito;
+  const { handleSignout } = cognito;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -67,7 +67,7 @@ export default function SideNavbar({}: Props) {
             href: '',
             icon: Icons.LogOut,
             variant: 'ghost',
-            clickAction: signOut,
+            clickAction: handleSignout,
           },
         ]}
       />

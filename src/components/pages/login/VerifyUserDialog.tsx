@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CognitoUser } from 'amazon-cognito-identity-js';
+import { confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
 import { Dispatch, SetStateAction } from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { errorToast, successToast } from '@/components/framework/toast';
+import { successToast } from '@/components/framework/toast';
 import { Text } from '@/components/framework/typography';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { userPool } from '@/config/cognitoConfig';
 import {
   verifyUserPayload,
   VerifyUserValidationSchema,
@@ -58,40 +57,30 @@ const VerifyUserDialog = ({
   }, [email]);
 
   async function handleUserVerify(formData: verifyUserPayload) {
-    const { email, confirmationCode } = formData;
-    const cognitoUser = new CognitoUser({ Username: email, Pool: userPool });
+    const payload = {
+      username: formData.email,
+      confirmationCode: formData.confirmationCode,
+    };
 
-    cognitoUser.confirmRegistration(confirmationCode, true, (error) => {
-      if (error) {
-        return errorToast({
-          message: 'Invalid confirmation code',
-        });
-      }
+    const { nextStep } = await confirmSignUp(payload);
 
-      successToast({
-        message: 'Account successfully verified!',
-      });
+    if (nextStep.signUpStep === 'DONE') {
       setOpen(false);
       setNoAccount(false);
-    });
+      successToast({
+        message: 'Yay!',
+        description: 'Your account is successfully verified',
+      });
+    }
   }
 
-  function handleResendCode() {
-    const cognitoUser = new CognitoUser({
-      Username: email as string,
-      Pool: userPool,
+  async function handleResendCode() {
+    await resendSignUpCode({
+      username: email as string,
     });
 
-    cognitoUser.resendConfirmationCode((error) => {
-      if (error) {
-        return errorToast({
-          message: error.message,
-        });
-      }
-
-      successToast({
-        message: 'Confirmation code successfully sent!',
-      });
+    successToast({
+      message: 'Confirmation code successfully sent!',
     });
   }
 
