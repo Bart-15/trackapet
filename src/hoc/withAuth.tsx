@@ -1,6 +1,6 @@
 'use client';
 
-import { redirect, usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import { LoadingSpinner } from '@/components/framework/loading-spinner';

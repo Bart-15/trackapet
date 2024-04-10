@@ -1,4 +1,9 @@
-import { AuthUser, getCurrentUser, signOut } from 'aws-amplify/auth';
+import {
+  AuthUser,
+  fetchAuthSession,
+  getCurrentUser,
+  signOut,
+} from 'aws-amplify/auth';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -22,6 +27,7 @@ interface AuthCognitoContextProps {
   setUser: Dispatch<SetStateAction<AuthUser | null>>;
   handleSignout: () => void;
   getAuthUser: () => void;
+  idToken: string | undefined;
 }
 
 export const AuthCognitoContext = createContext<
@@ -34,10 +40,16 @@ const AuthCognitoProvider = ({ children }: IAuthCognitoProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuth, setIsAuth] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [idToken, setIdToken] = useState<string | undefined>();
 
   async function getAuthUser() {
     try {
       const authUser = await getCurrentUser();
+      const { tokens } = await fetchAuthSession({ forceRefresh: true });
+      const hasToken = tokens?.idToken?.toString();
+
+      setIdToken(hasToken);
+      setIsAuth(hasToken ? true : false);
       setUser(authUser);
     } catch (error) {
       setIsAuth(false);
@@ -71,6 +83,7 @@ const AuthCognitoProvider = ({ children }: IAuthCognitoProviderProps) => {
     handleSignout,
     getAuthUser,
     loading,
+    idToken,
   };
 
   return (

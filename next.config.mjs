@@ -8,6 +8,7 @@ const nextConfig = {
     AWS_COGNITO_POOL_ID: process.env.AWS_COGNITO_POOL_ID,
     AWS_COGNITO_APP_CLIENT_ID: process.env.AWS_COGNITO_APP_CLIENT_ID,
     AWS_COGNITO_IDENTITY_POOL_ID: process.env.AWS_COGNITO_IDENTITY_POOL_ID,
+    BASE_API_URL: process.env.BASE_API_URL,
   },
 
   async redirects() {

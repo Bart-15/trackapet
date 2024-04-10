@@ -15,7 +15,8 @@ export function generateQueryClient(): QueryClient {
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        staleTime: 2 * (60 * 1000), // 2 mins, it depends
+        staleTime: 5 * (60 * 1000), // 5 mins, it depends
+        refetchInterval: 6 * (60 * 1000), // 6 mins
       },
       mutations: {
         onError: queryErrHandler,
