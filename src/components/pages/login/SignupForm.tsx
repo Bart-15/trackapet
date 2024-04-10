@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { InputPassword } from '@/components/framework/forms/input-password';
-import { warningToast } from '@/components/framework/toast';
+import { errorToast, warningToast } from '@/components/framework/toast';
 import { Text } from '@/components/framework/typography';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -35,6 +35,8 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
   const [userVerifyDialog, setUserVerifyDialog] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
 
+  const [submitting, setSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -46,6 +48,7 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
   });
 
   async function handleSignup(formData: signupPayload) {
+    setSubmitting(true);
     const payload = {
       username: formData.email,
       password: formData.password,
@@ -72,9 +75,14 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
           break;
         default:
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
+    } catch (error) {
+      if (error instanceof Error) {
+        errorToast({
+          message: error.message,
+        });
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -118,11 +126,12 @@ const SignupForm = ({ setNoAccount }: ISignupForm) => {
           </Text>
         </Text>
         <Button
+          isLoading={submitting}
           form='signup-form'
           type='submit'
           className={buttonVariants({
             variant: 'default',
-            className: 'w-full	',
+            className: 'w-full',
           })}
         >
           Signup
