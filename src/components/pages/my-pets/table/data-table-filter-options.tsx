@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { type Table } from '@tanstack/react-table';
 import { ChangeEvent, SetStateAction } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Option } from '@/types/global.types';
+
+import AddPetDialog from '../AddPetForm';
 
 interface DataTableFilterOptionsProps<TData, TValue> {
   table: Table<TData>;
@@ -27,42 +30,54 @@ export function DataTableFilterOptions<TData, TValue>({
   globalFilter,
   setGlobalFilter,
 }: DataTableFilterOptionsProps<TData, TValue>) {
+  const [openDialog, setOpenDialog] = useState(false);
+
   return (
-    <div className='flex items-center py-4'>
-      <div className='flex items-center gap-2'>
-        <Input
-          placeholder='Search ...'
-          value={globalFilter}
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            setGlobalFilter(event.target.value)
-          }
-          className='max-w-sm'
-        />
+    <>
+      <div className='flex items-center py-4'>
+        <div className='flex items-center gap-2'>
+          <Input
+            placeholder='Search ...'
+            value={globalFilter}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setGlobalFilter(event.target.value)
+            }
+            className='max-w-sm'
+          />
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='outline' className='ml-auto'>
+              Hide Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className='capitalize'
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button onClick={() => setOpenDialog(true)} className='ml-2'>
+          Add Pet
+        </Button>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant='outline' className='ml-auto'>
-            Hide Columns
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
-          {table
-            .getAllColumns()
-            .filter((column) => column.getCanHide())
-            .map((column) => {
-              return (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className='capitalize'
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              );
-            })}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+
+      <AddPetDialog open={openDialog} setOpen={setOpenDialog} />
+    </>
   );
 }
