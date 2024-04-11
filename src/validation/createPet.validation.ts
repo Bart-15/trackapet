@@ -1,4 +1,4 @@
-import { coerce, date, number, object, string, TypeOf, z } from 'zod';
+import { date, object, string, TypeOf, z } from 'zod';
 
 export const MAX_FILE_SIZE = 2000000;
 export const ACCEPTED_IMAGE_TYPES = [

@@ -7,7 +7,6 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useContext } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
 import {
