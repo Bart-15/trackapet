@@ -1,6 +1,6 @@
 import PageTitle from '@/components/common/PageTitle';
 import { LoadingSpinner } from '@/components/framework/loading-spinner';
-import usePetList from '@/hooks/usePetList';
+import usePetList from '@/hooks/my-pets/usePetList';
 
 import { defaultColumns } from './table/columns';
 import { DataTable as PetsTable } from './table/data-table';

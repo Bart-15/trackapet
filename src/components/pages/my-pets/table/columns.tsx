@@ -48,19 +48,6 @@ export const defaultColumns = [
       );
     },
   }),
-  columnHelper.accessor('owner', {
-    header: ({ column }) => {
-      return (
-        <span
-          className='flex cursor-pointer justify-start gap-1'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Owner
-          <Icons.arrowUpDown className='ml-2 h-4 w-4' />
-        </span>
-      );
-    },
-  }),
   columnHelper.accessor('species', {
     header: ({ column }) => {
       return (
@@ -72,6 +59,9 @@ export const defaultColumns = [
           <Icons.arrowUpDown className='ml-2 h-4 w-4' />
         </span>
       );
+    },
+    cell: ({ row }) => {
+      return <span className='capitalize'>{row.getValue('species')}</span>;
     },
   }),
   columnHelper.accessor('breed', {
@@ -116,9 +106,7 @@ export const defaultColumns = [
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue('birthDate'));
-      const formatted = date.toLocaleString();
-      return <span>{formatted}</span>;
+      return <span>{row.getValue('birthDate')}</span>;
     },
   }),
   columnHelper.accessor('weight', {
