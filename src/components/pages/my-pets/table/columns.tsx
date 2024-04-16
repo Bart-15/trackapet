@@ -1,37 +1,36 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-unused-vars */
 /* eslint-disable import/named */
 'use client';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@radix-ui/react-dropdown-menu';
 import { createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
 
+import { CustomAlertDialog } from '@/components/common/CustomAlertDialog';
 import { Icons } from '@/components/Icons';
-import { Button } from '@/components/ui/button';
+import { useDeletePet } from '@/hooks/my-pets/useDeletePet';
+import { createPetPayload } from '@/validation/createPet.validation';
 
-export type Pet = {
+import UpdatePetForm from '../UpdatePetForm';
+
+export type PetColTypes = {
   petId: string;
   name: string;
   size: string;
   color: string;
   weight: string;
-  age: number;
+  age: string;
   breed: string;
-  location: string;
-  birthDate: string;
+  fullAddress: string;
+  birthDate: string | Date;
   temperament: string;
   species: string;
   owner: string;
+  photo: string;
 };
 
-export const columnHelper = createColumnHelper<Pet>();
+export const columnHelper = createColumnHelper<PetColTypes>();
 
 export const defaultColumns = [
   // Display Columns
@@ -133,25 +132,41 @@ export const defaultColumns = [
       );
     },
     cell: ({ row }) => {
-      const user = row.original;
+      const pet = row.original;
+
+      const deletePet = useDeletePet();
+      const [openDeleteDialog, setDeleteDialog] = useState<boolean>(false);
+      const [openUpdateDialog, setUpdateDialog] = useState<boolean>(false);
+
+      async function handleDeletePet(id: string) {
+        await deletePet.mutateAsync(id);
+      }
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className='cursor-pointer rounded-sm border bg-slate-50 px-2 py-3 shadow-sm	'
-            align='end'
-          >
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Update Pet</DropdownMenuItem>
-            <DropdownMenuItem>Delete Pet</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <div className='flex flex-row gap-1'>
+            <CustomAlertDialog
+              title='Delete Pet'
+              open={openDeleteDialog}
+              setOpen={setDeleteDialog}
+              description={`Are you sure you want to delete '${pet.name}'`}
+              onProceedCallback={() => handleDeletePet(pet.petId)}
+              onCanceledCallback={() => setDeleteDialog(false)}
+              customButton={<Icons.trash className='text-red-600' />}
+            />
+            <Icons.edit
+              className='cursor-pointer text-green-600'
+              onClick={() => setUpdateDialog(true)}
+            />
+          </div>
+
+          <UpdatePetForm
+            id={pet.petId}
+            open={openUpdateDialog}
+            setOpen={setUpdateDialog}
+            pet={pet}
+          />
+        </>
       );
     },
   }),
