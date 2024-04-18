@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 import { Icons } from '@/components/Icons';
@@ -23,10 +23,16 @@ import {
 
 interface UploadPhotoProps {
   form: UseFormReturn<createPetPayload, any, undefined>;
+  placeholder: string;
+  setPlaceholder: Dispatch<SetStateAction<string>>;
 }
 
-const UploadPhoto = ({ form }: UploadPhotoProps) => {
-  const { mutation, presignedUrl, setPresignedUrl } = useUploadPhoto();
+const UploadPhoto = ({
+  form,
+  placeholder,
+  setPlaceholder,
+}: UploadPhotoProps) => {
+  const mutation = useUploadPhoto();
 
   async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files?.[0]) return;
@@ -42,7 +48,9 @@ const UploadPhoto = ({ form }: UploadPhotoProps) => {
       photo: base64,
     });
 
+    console.log(response);
     if (response.status === 200) {
+      setPlaceholder(response.data?.presignedURL);
       form.setValue('photo', e.target.files, {
         shouldValidate: true,
       });
@@ -71,10 +79,10 @@ const UploadPhoto = ({ form }: UploadPhotoProps) => {
                   </Label>
                   <FormControl>
                     <div className='flex w-full items-center justify-center'>
-                      {presignedUrl ? (
+                      {placeholder ? (
                         <div className='relative flex h-64 w-full'>
                           <Image
-                            src={presignedUrl}
+                            src={placeholder}
                             alt='pre-upload-photo'
                             width='50'
                             height='50'
@@ -94,7 +102,7 @@ const UploadPhoto = ({ form }: UploadPhotoProps) => {
                               form.setValue('photoFilename', '', {
                                 shouldValidate: true,
                               });
-                              setPresignedUrl('');
+                              setPlaceholder('');
                             }}
                           >
                             <Icons.trash className='h-8 w-8 text-white' />{' '}

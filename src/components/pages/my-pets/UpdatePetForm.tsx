@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { LoadingSpinner } from '@/components/framework/loading-spinner';
@@ -38,8 +38,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { animalSpecies, sizes } from '@/data/const';
-import { useCreatePet } from '@/hooks/my-pets/useCreatePet';
 import useGetPet from '@/hooks/my-pets/useGetPet';
+import { useUpdatePet } from '@/hooks/my-pets/useUpdatePet';
 import { cn } from '@/lib/utils';
 import {
   createPetPayload,
@@ -72,30 +72,39 @@ const initFormValues = {
 
 // This component handles the Add pet functionality
 const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
-  const { data, isLoading, isFetching } = useGetPet(id);
+  const { data, isLoading } = useGetPet(id);
 
-  const createPet = useCreatePet();
+  const updatePet = useUpdatePet();
+  const [presignedPhoto, setPresignedPhoto] = useState<string>('');
 
   const form = useForm<createPetPayload>({
     mode: 'onChange',
     resolver: zodResolver(createPetValidationSchema),
     defaultValues: {
       name: pet?.name,
-      species: 'cat',
       breed: pet?.breed,
-      age: pet?.age,
-      weight: pet?.weight,
+      age: pet?.age.toString(),
+      weight: pet?.weight.toString(),
       fullAddress: pet?.fullAddress,
       size: pet?.size,
       birthDate: new Date(pet?.birthDate),
       temperament: pet?.temperament,
+      color: pet?.color,
+      photo: pet?.photo,
     },
   });
+
+  useEffect(() => {
+    if (data?.data) {
+      setPresignedPhoto(data?.data.photo);
+    }
+  }, [data]);
 
   async function handleAddPet(values: createPetPayload) {
     const formattedDate = format(values.birthDate, 'yyyy-MM-dd');
     const payload = {
       ...values,
+      id: id,
       birthDate: formattedDate,
       photo: values.photoFilename!,
       age: parseInt(values.age),
@@ -104,18 +113,17 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
     };
 
     delete payload?.photoFilename;
-    const response = await createPet.mutateAsync(payload);
+    const response = await updatePet.mutateAsync(payload);
 
     if (response.status === 200) {
       setOpen(false);
     }
   }
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  console.log(pet);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className='max-h-[500px] overflow-y-auto sm:max-w-[500px]'>
@@ -126,7 +134,7 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
           <form
             className='flex flex-col gap-2'
             onSubmit={form.handleSubmit(handleAddPet)}
-            id='add-pet-form'
+            id='update-pet-form'
           >
             <FormField
               control={form.control}
@@ -149,7 +157,10 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <Select onValueChange={field.onChange}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={pet?.species}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select species' />
@@ -235,7 +246,10 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
               render={({ field }) => {
                 return (
                   <FormItem>
-                    <Select onValueChange={field.onChange}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={pet?.size}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select size' />
@@ -331,14 +345,18 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
               )}
             />
 
-            <UploadPhoto form={form} />
+            <UploadPhoto
+              form={form}
+              placeholder={presignedPhoto}
+              setPlaceholder={setPresignedPhoto}
+            />
             <DialogFooter>
               <Button
-                isLoading={createPet.isPending}
+                isLoading={updatePet.isPending}
                 type='submit'
-                form='add-pet-form'
+                form='update-pet-form'
               >
-                Create Pet
+                Update Pet
               </Button>
             </DialogFooter>
           </form>

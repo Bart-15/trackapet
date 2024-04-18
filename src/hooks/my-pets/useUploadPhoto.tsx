@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { useState } from 'react';
 
 import {
   errorToast,
@@ -11,8 +10,6 @@ import {
 import useAxiosPrivate from '../useAxiosPrivate';
 
 export function useUploadPhoto() {
-  const [presignedUrl, setPresignedUrl] = useState<string>('');
-
   const axiosPrivate = useAxiosPrivate();
 
   const mutation = useMutation({
@@ -23,8 +20,7 @@ export function useUploadPhoto() {
         message: 'Please wait, processing upload ...',
       });
     },
-    onSuccess: (data) => {
-      setPresignedUrl(data.data?.presignedURL);
+    onSuccess: () => {
       successToast({
         message: 'Pet photo sucessfully uploaded to s3 bucket',
       });
@@ -38,9 +34,5 @@ export function useUploadPhoto() {
     },
   });
 
-  return {
-    mutation,
-    presignedUrl,
-    setPresignedUrl,
-  };
+  return mutation;
 }

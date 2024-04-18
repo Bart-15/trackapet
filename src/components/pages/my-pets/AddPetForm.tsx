@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -67,6 +67,8 @@ const initFormValues = {
 
 // This component handles the Add pet functionality
 const AddPetDialog = ({ open, setOpen }: AddPetProps) => {
+  const [presignedPhoto, setPresignedPhoto] = useState<string>('');
+
   const createPet = useCreatePet();
 
   const form = useForm<createPetPayload>({
@@ -313,7 +315,11 @@ const AddPetDialog = ({ open, setOpen }: AddPetProps) => {
               )}
             />
 
-            <UploadPhoto form={form} />
+            <UploadPhoto
+              form={form}
+              placeholder={presignedPhoto}
+              setPlaceholder={setPresignedPhoto}
+            />
             <DialogFooter>
               <Button
                 isLoading={createPet.isPending}
