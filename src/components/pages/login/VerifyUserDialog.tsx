@@ -54,6 +54,7 @@ const VerifyUserDialog = ({
       setValue('email', email);
       setValue('confirmationCode', '');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
   async function handleUserVerify(formData: verifyUserPayload) {

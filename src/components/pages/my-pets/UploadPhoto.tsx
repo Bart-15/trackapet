@@ -48,7 +48,6 @@ const UploadPhoto = ({
       photo: base64,
     });
 
-    console.log(response);
     if (response.status === 200) {
       setPlaceholder(response.data?.presignedURL);
       form.setValue('photo', e.target.files, {

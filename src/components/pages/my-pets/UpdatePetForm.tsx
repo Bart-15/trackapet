@@ -56,20 +56,6 @@ interface AddPetProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const initFormValues = {
-  name: '',
-  species: '',
-  breed: '',
-  size: '',
-  color: '',
-  age: '',
-  weight: '',
-  temperament: '',
-  fullAddress: '',
-  birthDate: undefined,
-  photo: null,
-};
-
 // This component handles the Add pet functionality
 const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
   const { data, isLoading } = useGetPet(id);
