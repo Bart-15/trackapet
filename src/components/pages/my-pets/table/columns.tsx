@@ -12,6 +12,7 @@ import { Icons } from '@/components/Icons';
 import { useDeletePet } from '@/hooks/my-pets/useDeletePet';
 import { createPetPayload } from '@/validation/createPet.validation';
 
+import DonwloadQr from '../DownloadQr';
 import UpdatePetForm from '../UpdatePetForm';
 
 export type PetColTypes = {
@@ -137,6 +138,7 @@ export const defaultColumns = [
       const deletePet = useDeletePet();
       const [openDeleteDialog, setDeleteDialog] = useState<boolean>(false);
       const [openUpdateDialog, setUpdateDialog] = useState<boolean>(false);
+      const [openQrDialog, setQrDialog] = useState<boolean>(false);
 
       async function handleDeletePet(id: string) {
         await deletePet.mutateAsync(id);
@@ -145,6 +147,11 @@ export const defaultColumns = [
       return (
         <>
           <div className='flex flex-row gap-1'>
+            <Icons.qrCode
+              className='cursor-pointer'
+              name='Download Qr Code'
+              onClick={() => setQrDialog(true)}
+            />
             <CustomAlertDialog
               title='Delete Pet'
               open={openDeleteDialog}
@@ -166,6 +173,8 @@ export const defaultColumns = [
             setOpen={setUpdateDialog}
             pet={pet}
           />
+
+          <DonwloadQr open={openQrDialog} setOpen={setQrDialog} pet={pet} />
         </>
       );
     },
