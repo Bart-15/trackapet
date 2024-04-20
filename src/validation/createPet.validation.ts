@@ -95,17 +95,17 @@ export const updatePetValidationSchema = object({
     ),
   size: string().min(1, { message: 'Size is required' }),
   photoFilename: string().optional(),
-  // photo: z
-  //   .any()
-  //   .refine((files) => files?.length == 1, 'Photo is required.')
-  //   .refine(
-  //     (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-  //     `Max file size is 2MB.`,
-  //   )
-  //   .refine(
-  //     (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-  //     '.jpg, .jpeg, .png and .webp files are accepted.',
-  //   ),
+  photo: z
+    .any()
+    .refine((files) => files?.length == 1, 'Photo is required.')
+    .refine(
+      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+      `Max file size is 2MB.`,
+    )
+    .refine(
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      '.jpg, .jpeg, .png and .webp files are accepted.',
+    ),
   temperament: string().min(1, { message: 'Temperament' }),
   fullAddress: string().min(1, { message: 'Full address is required' }),
 });

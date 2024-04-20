@@ -4,6 +4,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Schema } from 'zod';
 
 import { LoadingSpinner } from '@/components/framework/loading-spinner';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ import { useUpdatePet } from '@/hooks/my-pets/useUpdatePet';
 import { cn } from '@/lib/utils';
 import {
   createPetPayload,
-  createPetValidationSchema,
+  updatePetValidationSchema,
 } from '@/validation/createPet.validation';
 
 import { PetColTypes } from './table/columns';
@@ -58,17 +59,34 @@ interface AddPetProps {
 
 // This component handles the Add pet functionality
 const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
-  const { data, isLoading } = useGetPet(id);
+  const [modifiedValidation, setModifiedValidation] = useState<Schema<object>>(
+    updatePetValidationSchema,
+  );
+  const { data: petData, isLoading } = useGetPet(id);
 
   const updatePet = useUpdatePet();
   const [presignedPhoto, setPresignedPhoto] = useState<string>('');
 
+  useEffect(() => {
+    // Update the validation schema based on the value of presignedPhoto
+    setModifiedValidation((currentSchema) => {
+      if (presignedPhoto) {
+        // If presignedPhoto is present, omit the validation for the photo field
+        // @ts-ignore
+        return currentSchema.omit({ photo: true });
+      }
+      // If presignedPhoto is not present, use the base validation schema
+      return updatePetValidationSchema;
+    });
+  }, [presignedPhoto]); // Include photoFilename in dependencies
+
   const form = useForm<createPetPayload>({
     mode: 'onChange',
-    resolver: zodResolver(createPetValidationSchema),
+    resolver: zodResolver(modifiedValidation),
     defaultValues: {
       name: pet?.name,
       breed: pet?.breed,
+      species: pet?.species,
       age: pet?.age.toString(),
       weight: pet?.weight.toString(),
       fullAddress: pet?.fullAddress,
@@ -76,15 +94,15 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
       birthDate: new Date(pet?.birthDate),
       temperament: pet?.temperament,
       color: pet?.color,
-      photo: pet?.photo,
+      photoFilename: petData?.data.photoFilename,
     },
   });
 
   useEffect(() => {
-    if (data?.data) {
-      setPresignedPhoto(data?.data.photo);
+    if (petData?.data) {
+      setPresignedPhoto(petData?.data.photo);
     }
-  }, [data]);
+  }, [petData]);
 
   async function handleAddPet(values: createPetPayload) {
     const formattedDate = format(values.birthDate, 'yyyy-MM-dd');
@@ -92,13 +110,14 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
       ...values,
       id: id,
       birthDate: formattedDate,
-      photo: values.photoFilename!,
+      photo: values.photoFilename! || petData?.data.photoFilename,
       age: parseInt(values.age),
       weight: parseInt(values.weight),
       notifiedCount: 0,
     };
 
     delete payload?.photoFilename;
+
     const response = await updatePet.mutateAsync(payload);
 
     if (response.status === 200) {
@@ -109,7 +128,6 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className='max-h-[500px] overflow-y-auto sm:max-w-[500px]'>
@@ -145,7 +163,8 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
                   <FormItem>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={pet?.species}
+                      defaultValue={pet?.species || ''}
+                      value={pet?.species}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -234,7 +253,8 @@ const UpdatePetForm = ({ id, open, setOpen, pet }: AddPetProps) => {
                   <FormItem>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={pet?.size}
+                      defaultValue={pet?.size || ''}
+                      value={pet?.size}
                     >
                       <FormControl>
                         <SelectTrigger>
