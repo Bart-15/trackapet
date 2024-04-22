@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## TrackaPet App Overview
 
-## Getting Started
+<p>Welcome to TrackAPet! This app offers a comprehensive pet management system allowing you to Create, Read, Update, and Delete (CRUD) pet records with ease.</p>
+<p>
+One of the standout features is user can generate and download QR codes for each pet. These QR codes provide quick access to detailed pet information.</p>
+<p>Once your pet's QR code is generated, users can seamlessly access the pet's information via a public route. Additionally, I integrated a notification system to alert owners in case their pet goes missing. However, to ensure fair usage, I implemented a limit of three notifications per day. If this limit is exceeded, users will need to wait for 24 hours before sending additional notifications to the owner of the pet.</p>
 
-First, run the development server:
+## Demo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Live Demo, [click here](https://master.d22fz19hvstqpj.amplifyapp.com/login)
+
+## Cloning and installing
+
+Clone this repository.
+
+```
+https://github.com/Bart-15/trackapet.git
+cd trackapet
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install the NPM dependencies for this project.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Running the application
 
-## Learn More
+You can run the application by typing in:
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application should now be running at [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## AWS Services
 
-## Deploy on Vercel
+<p>
+  </br>
+  <a href="https://github.com/Bart-15/my-pets-backend" target=”_blank”>Backend Service</a>
+  <br/>
+  <a href="https://github.com/Bart-15/my-pet-authorizer" target=”_blank”>AWS Cognito Authorizer</a>
+  <br/>
+</p>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Sample email
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+![sample email](https://github.com/Bart-15/trackapet/assets/73633889/4cea2bcf-cfc8-4eb0-bef0-f8b51d466f46)
+
+## UI - Tailwind Css, Shadcn UI and Tanstack Table
+
+![Screenshot (1625)](https://github.com/Bart-15/trackapet/assets/73633889/c489a46e-eca5-433b-9353-8ad9315f53a6)
+![Screenshot (1626)](https://github.com/Bart-15/trackapet/assets/73633889/69e23f32-a9d3-4ad0-914d-dcdad49d3169)
+![Screenshot (1627)](https://github.com/Bart-15/trackapet/assets/73633889/ebd3be7d-8ee7-40bd-b19a-195ac9375f5c)
+![Screenshot (1628)](https://github.com/Bart-15/trackapet/assets/73633889/1be155e4-09d4-4731-8215-5a7301f66513)
+![Screenshot (1629)](https://github.com/Bart-15/trackapet/assets/73633889/6e27b4d6-1368-474c-82bd-d05790f6a318)
+![notify](https://github.com/Bart-15/trackapet/assets/73633889/52d1fadc-e979-4b43-94de-513338c7b0e1)
